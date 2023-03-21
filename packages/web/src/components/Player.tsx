@@ -1,11 +1,13 @@
 import { Popover, Transition } from "@headlessui/react";
 import { Pen } from "@phosphor-icons/react";
 import clx from "classnames";
-import { Fragment } from "react";
+import { FormEvent, Fragment, useRef } from "react";
+import { socket } from "../lib/socket";
 
 type Sides = "top" | "bottom";
 
 interface PlayerProps {
+  id: string;
   name: string;
   avatarUrl?: string;
   side: Sides;
@@ -15,10 +17,50 @@ interface PlayerProps {
 }
 
 export function Player(props: PlayerProps) {
+  function createHandleChangeName(
+    closeFn: (
+      args:
+        | HTMLElement
+        | React.MutableRefObject<HTMLElement | null>
+        | undefined,
+    ) => unknown,
+  ) {
+    return (e: FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      const form = new FormData(e.currentTarget);
+
+      const name = form.get("name");
+
+      socket.emit("user:update", {
+        id: props.id,
+        name,
+      });
+
+      closeFn(undefined);
+    };
+  }
+
   const classNames = clx("flex items-center gap-2 p-2", {
     "flex-col flex-col-reverse": props.side === "top",
     "flex-col": props.side === "bottom",
   });
+
+  const animations = {
+    top: {
+      enterFrom: "opacity-0 -translate-y-1",
+      enterTo: "opacity-100 translate-y-0",
+      leaveFrom: "opacity-100 translate-y-0",
+      leaveTo: "opacity-0 -translate-y-1",
+    },
+    bottom: {
+      enterFrom: "opacity-0 translate-y-1",
+      enterTo: "opacity-100 translate-y-0",
+      leaveFrom: "opacity-100 translate-y-0",
+      leaveTo: "opacity-0 translate-y-1",
+    },
+  };
+
+  const animation = animations[props.side];
 
   return (
     <div className={classNames}>
@@ -39,7 +81,7 @@ export function Player(props: PlayerProps) {
       {props.avatarUrl ? (
         <div className="w-14 h-14 rounded-full bg-zinc-600"></div>
       ) : (
-        <p
+        <div
           className={`flex items-center gap-2 relative ${
             props.isYou ? "text-green-500 font-semibold" : ""
           }`}
@@ -53,34 +95,41 @@ export function Player(props: PlayerProps) {
               <Transition
                 as={Fragment}
                 enter="transition ease-out duration-200"
-                enterFrom="opacity-0 translate-y-1"
-                enterTo="opacity-100 translate-y-0"
+                enterFrom={animation.enterFrom}
+                enterTo={animation.enterTo}
                 leave="transition ease-in duration-150"
-                leaveFrom="opacity-100 translate-y-0"
-                leaveTo="opacity-0 translate-y-1"
+                leaveFrom={animation.leaveFrom}
+                leaveTo={animation.leaveTo}
               >
                 <Popover.Panel
-                  className={`absolute left-1/2 z-10 w-screen max-w-sm -translate-x-1/2 transform px-4 ${
-                    props.side === "bottom" ? "mt-3" : "-top-16"
+                  className={`absolute left-1/2 z-10 -translate-x-1/2 transform px-4 ${
+                    props.side === "bottom" ? "mt-3" : "-top-14"
                   }`}
                 >
-                  <div className="overflow-hidden rounded-lg shadow-lg ring-1 ring-black ring-opacity-5">
-                    <form className="relative flex gap-8 bg-white p-2 items-center">
-                      <input
-                        type="text"
-                        className="outline-0 w-full px-2  text-zinc-800"
-                        placeholder={props.name}
-                      />
-                      <button className="bg-zinc-800 hover:bg-zinc-700 text-white hover:text-green-400 transition-colors h-10 px-4 rounded-md">
-                        Salvar
-                      </button>
-                    </form>
-                  </div>
+                  {({ close }) => (
+                    <div className="overflow-hidden rounded-lg shadow-lg ring-1 ring-black ring-opacity-5">
+                      <form
+                        onSubmit={createHandleChangeName(close)}
+                        className="relative flex gap-2 bg-white p-1 items-center text-sm"
+                      >
+                        <input
+                          type="text"
+                          name="name"
+                          className="outline-0  px-2  text-zinc-800"
+                          placeholder={props.name}
+                          autoFocus
+                        />
+                        <button className="bg-zinc-800 hover:bg-zinc-700 text-white hover:text-green-400 transition-colors h-8 px-4 rounded-md">
+                          Salvar
+                        </button>
+                      </form>
+                    </div>
+                  )}
                 </Popover.Panel>
               </Transition>
             </Popover>
           ) : null}
-        </p>
+        </div>
       )}
     </div>
   );

@@ -134,6 +134,7 @@ export function RoomDetail() {
               commonUsers.map((cUser) => (
                 <Player
                   key={cUser.id}
+                  id={cUser.id}
                   isYou={cUser.id === me?.id}
                   name={cUser.name ?? "Unknow"}
                   selectedCard={cUser.selectedCard}
@@ -168,6 +169,7 @@ export function RoomDetail() {
             {owner ? (
               <Player
                 isYou={owner.id === me?.id}
+                id={owner.id}
                 name={owner.name ?? "Unknow"}
                 side="bottom"
                 selectedCard={owner.selectedCard}

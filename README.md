@@ -9,3 +9,4 @@ A voting system for plannings inspired on Planning Poke.
 - Tailwindcss
 - NestJS
 - Socket.io
+- Turborepo
