@@ -11,7 +11,7 @@ async function bootstrap() {
 
   console.log({ cors });
 
-  app.enableCors({ origin: '*' });
+  // app.enableCors({ origin: '*' });
   app.useGlobalPipes(new ValidationPipe());
   await app.listen(3000);
 }
