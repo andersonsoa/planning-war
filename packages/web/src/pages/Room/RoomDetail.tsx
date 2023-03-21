@@ -1,8 +1,6 @@
-import clx from "classnames";
 import { useEffect, useMemo, useState } from "react";
 import { socket } from "../../lib/socket";
 import { LoaderFunctionArgs, useNavigate } from "react-router-dom";
-import { CheckCircle, Copy } from "@phosphor-icons/react";
 import { Side } from "../../components/Side";
 import { Player } from "../../components/Player";
 import { ClipboardButton } from "../../components/ClipboardButton";

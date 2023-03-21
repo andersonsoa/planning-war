@@ -15,7 +15,7 @@ export function RoomCreate() {
       title: form.get("room-name"),
     });
 
-    fetch("http://localhost:3000/api/room", {
+    fetch(`${import.meta.env.VITE_SERVER_URL}/api/room`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
