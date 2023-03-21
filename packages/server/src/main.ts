@@ -9,7 +9,9 @@ async function bootstrap() {
 
   const cors = configService.get('CORS_URL');
 
-  app.enableCors({ origin: cors });
+  console.log({ cors });
+
+  app.enableCors({ origin: '*' });
   app.useGlobalPipes(new ValidationPipe());
   await app.listen(3000);
 }

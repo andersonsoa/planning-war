@@ -12,7 +12,11 @@ import { Server, Socket } from 'socket.io';
 import { HttpService } from './http.service';
 import { UpdateUserDTO } from './dto/updateUser.dto';
 
-@WebSocketGateway({ cors: '*' })
+@WebSocketGateway({
+  cors: {
+    origin: '*',
+  },
+})
 export class HttpGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
