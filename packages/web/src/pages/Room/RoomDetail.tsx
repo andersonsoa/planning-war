@@ -99,6 +99,7 @@ export function RoomDetail() {
 
   const average = useMemo(() => {
     return room?.users
+      .filter((u) => !u.isSpectator)
       .map((u) => ({ ...u, selectedCard: u.selectedCard || "😴" }))
       .reduce((acc: Record<string, any>, cur) => {
         return {
@@ -139,6 +140,7 @@ export function RoomDetail() {
                   name={cUser.name ?? "Unknow"}
                   selectedCard={cUser.selectedCard}
                   isReveled={room?.isReveled}
+                  isSpectator={cUser.isSpectator}
                   side="top"
                 />
               ))
@@ -174,6 +176,7 @@ export function RoomDetail() {
                 side="bottom"
                 selectedCard={owner.selectedCard}
                 isReveled={room?.isReveled}
+                isSpectator={owner.isSpectator}
               />
             ) : null}
           </Side>
@@ -212,6 +215,7 @@ export function RoomDetail() {
                 return (
                   <button
                     key={value}
+                    disabled={owner?.isSpectator}
                     className={`w-14 h-24 rounded grid place-items-center transition-all text-lg font-bold ${
                       value === me?.selectedCard
                         ? "bg-purple-600 -translate-y-2"
