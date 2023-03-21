@@ -13,7 +13,6 @@ export function RoomCreate() {
     const data = JSON.stringify({
       socketId: socket.id,
       title: form.get("room-name"),
-      userName: form.get("user-name"),
     });
 
     fetch("http://localhost:3000/api/room", {
@@ -37,27 +36,13 @@ export function RoomCreate() {
       onSubmit={onSubmit}
     >
       <label htmlFor="room-name" className="block">
-        <p className="text-sm mb-1">
+        <p className="text-md mb-1">
           - Escolha um nome para a sua{" "}
           <strong className="text-red-600">Guerra!</strong>
         </p>
         <input
           id="room-name"
           name="room-name"
-          type="text"
-          className="text-black text-xl px-2 h-12 w-full rounded bg-zinc-300 shadow"
-          required
-        />
-      </label>
-
-      <label htmlFor="user-name" className="block">
-        <p className="text-sm mb-1">
-          - Escolha o seu nome de{" "}
-          <strong className="text-red-600">Guerra!</strong>
-        </p>
-        <input
-          id="user-name"
-          name="user-name"
           type="text"
           className="text-black text-xl px-2 h-12 w-full rounded bg-zinc-300 shadow"
           required

@@ -27,7 +27,7 @@ export class HttpService {
 
     const newUser = new User({
       id: userId,
-      name: roomData.userName,
+      name: nameGenerator(),
       socketId: roomData.socketId,
     });
 

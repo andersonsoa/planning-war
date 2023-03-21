@@ -100,15 +100,17 @@ export function RoomDetail() {
   const average = useMemo(() => {
     return room?.users
       .map((u) => ({ ...u, selectedCard: u.selectedCard || "😴" }))
-      .reduce(
-        (acc: Record<string, number>, cur) => ({
+      .reduce((acc: Record<string, any>, cur) => {
+        return {
           ...acc,
           [cur.selectedCard]: acc[cur.selectedCard]
-            ? acc[cur.selectedCard] + 1
-            : 1,
-        }),
-        {},
-      );
+            ? {
+                count: acc[cur.selectedCard].count + 1,
+                names: [...acc[cur.selectedCard].names, cur.name],
+              }
+            : { count: 1, names: [cur.name] },
+        };
+      }, {});
   }, [room?.isReveled]);
 
   return (
@@ -178,8 +180,25 @@ export function RoomDetail() {
 
       <footer className="px-4 h-36">
         {room?.isReveled ? (
-          <div className="flex justify-center items-center">
-            <pre>{JSON.stringify(average, null, 2)}</pre>
+          <div className="flex justify-center items-center gap-4">
+            {average &&
+              Object.keys(average).map((key) => (
+                <div className="flex gap-2 p-3 rounded bg-zinc-800" key={key}>
+                  <div className="w-14 h-24 relative rounded grid place-items-center transition-all text-lg font-bold bg-purple-600">
+                    {key}
+                    <span className="w-6 h-6 grid place-items-center rounded-full bg-red-600 shadow absolute -bottom-2 -right-2 text-sm ring-2 ring-zinc-800">
+                      {average[key].count}
+                    </span>
+                  </div>
+                  <ul>
+                    {average[key].names.map((name: string) => (
+                      <li key={name} className="text-sm">
+                        {name}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
           </div>
         ) : (
           <div className="flex flex-col items-center gap-4">
