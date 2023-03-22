@@ -102,6 +102,10 @@ export class HttpService {
     if (user.roomId !== room.id) return null;
 
     room.isReveled = false;
+    if (room.issue) {
+      room.issues.push(room.issue);
+    }
+    room.issue = '';
 
     for (const userId of room.users) {
       const u = await this.userRepository.getUserById(userId);
@@ -116,6 +120,15 @@ export class HttpService {
     return newRoom;
   }
 
+  async setRoomRoundIssue(roomId: string, issue: string) {
+    const room = await this.roomRepository.getRoomById(roomId);
+    if (!room) return false;
+
+    room.issue = issue;
+
+    await this.roomRepository.saveRoom(room);
+    return true;
+  }
   async removeUserFromRoom(userSocketId: string) {
     const user = await this.userRepository.getUserBySocket(userSocketId);
     if (!user) return null;

@@ -18,7 +18,10 @@ export class InMemoryRoomRepository extends RoomRepository {
     );
 
     if (roomAlreadyExistsIdx !== -1) {
-      this.roons[roomAlreadyExistsIdx] = roomData;
+      this.roons[roomAlreadyExistsIdx] = {
+        ...this.roons[roomAlreadyExistsIdx],
+        ...roomData,
+      };
       return this.roons[roomAlreadyExistsIdx];
     }
 

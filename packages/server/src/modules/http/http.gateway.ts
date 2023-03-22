@@ -75,9 +75,17 @@ export class HttpGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('room:update')
   async onRoonUpdate(
     @ConnectedSocket() client: Socket,
-    @MessageBody() data: any,
+    @MessageBody() data: { roomId: string; issue: string },
   ) {
-    client.emit('hello', data);
+    const success = await this.httpService.setRoomRoundIssue(
+      data.roomId,
+      data.issue,
+    );
+
+    if (success) {
+      const room = await this.httpService.getUpdatedRoom(data.roomId);
+      this.server.to(room.id).emit('room:updated', room);
+    }
   }
 
   @SubscribeMessage('room:reveal')

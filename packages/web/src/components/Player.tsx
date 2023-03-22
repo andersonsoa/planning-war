@@ -45,6 +45,7 @@ export function Player(props: PlayerProps) {
     socket.emit("user:update", {
       id: props.id,
       isSpectator: !props.isSpectator,
+      selectedCard: "",
     });
   }
 
@@ -147,7 +148,7 @@ export function Player(props: PlayerProps) {
                         <input
                           type="text"
                           name="name"
-                          className="outline-0  px-2  text-zinc-800"
+                          className="outline-none focus:bottom-0 focus:outline-none px-2 text-zinc-800"
                           placeholder={props.name}
                           autoFocus
                         />

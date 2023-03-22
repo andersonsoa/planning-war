@@ -5,6 +5,8 @@ export class Room {
   turns: number;
   isReveled: boolean;
   users: string[];
+  issue: string;
+  issues: string[];
 
   constructor({
     id,
@@ -21,5 +23,7 @@ export class Room {
     this.turns = 0;
     this.isReveled = false;
     this.users = [];
+    this.issue = '';
+    this.issues = [];
   }
 }

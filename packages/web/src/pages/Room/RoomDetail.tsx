@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { socket } from "../../lib/socket";
 import { LoaderFunctionArgs, useNavigate } from "react-router-dom";
 import { Side } from "../../components/Side";
 import { Player } from "../../components/Player";
 import { ClipboardButton } from "../../components/ClipboardButton";
+import { Button } from "../../components/Button";
 
 type User = {
   id: string;
@@ -21,6 +22,7 @@ type Room = {
   turns: number;
   isReveled: boolean;
   users: User[];
+  issue: string;
 };
 
 export function loader({ params }: LoaderFunctionArgs) {
@@ -55,6 +57,18 @@ export function RoomDetail() {
     if (room?.isReveled && room?.ownerId === me?.id) {
       socket.emit("room:new-round", room?.id);
     }
+  }
+
+  function onSubmitRoomIssue(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = new FormData(e.currentTarget);
+    const issue = form.get("issue");
+    e.currentTarget.reset();
+
+    socket.emit("room:update", {
+      roomId: room?.id,
+      issue,
+    });
   }
 
   useEffect(() => {
@@ -147,21 +161,30 @@ export function RoomDetail() {
 
           <div className="bg-zinc-800 rounded-b-lg rounded-t-full shadow-lg grid place-items-center">
             {!isOwner ? (
-              <h2>tu não é o dono da sala rapá</h2>
-            ) : room?.isReveled ? (
-              <button
-                onClick={handleNewRound}
-                className="py-3 w-48 ring-1 ring-zinc-500 rounded-lg shadow uppercase font-semibold tracking-widest transition-all hover:bg-zinc-900 hover:w-52"
-              >
-                Iniciar nova rodada!
-              </button>
+              <h2>{room?.issue || "O que será votado agora ?"}</h2>
             ) : (
-              <button
-                onClick={handleReveal}
-                className="py-3 w-48 ring-1 ring-zinc-500 rounded-lg shadow uppercase font-semibold tracking-widest transition-all hover:bg-zinc-900 hover:w-52"
-              >
-                Revelar!
-              </button>
+              <>
+                <form
+                  onSubmit={onSubmitRoomIssue}
+                  className="flex gap-1 rounded border border-zinc-700 p-1 max-w-sm w-full"
+                >
+                  <input
+                    type="text"
+                    name="issue"
+                    placeholder={room?.issue || "O que será votado agora ?"}
+                    className="bg-transparent focus:outline-none focus:border-none px-3 py-1 text-sm text-white w-full"
+                  />
+                  <button className="text-sm bg-zinc-600 rounded px-1">
+                    Salvar
+                  </button>
+                </form>
+
+                {room?.isReveled ? (
+                  <Button onClick={handleNewRound}>Iniciar nova rodada!</Button>
+                ) : (
+                  <Button onClick={handleReveal}>Revelar!</Button>
+                )}
+              </>
             )}
           </div>
 
@@ -213,7 +236,7 @@ export function RoomDetail() {
                 return (
                   <button
                     key={value}
-                    disabled={owner?.isSpectator}
+                    disabled={me?.isSpectator}
                     className={`w-14 h-24 rounded grid place-items-center transition-all text-lg font-bold ${
                       value === me?.selectedCard
                         ? "bg-purple-600 -translate-y-2"
