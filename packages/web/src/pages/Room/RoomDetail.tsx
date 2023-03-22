@@ -140,7 +140,7 @@ export function RoomDetail() {
               <div className="flex flex-col justify-center items-center p-4 gap-2">
                 <p>Se sentindo sozinho? 😴</p>
                 <ClipboardButton text={window.location.href}>
-                  Convide alguem
+                  Convide alguém
                 </ClipboardButton>
               </div>
             ) : (
