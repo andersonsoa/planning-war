@@ -39,11 +39,12 @@ export class HttpGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async onUserJoin(
     @ConnectedSocket() client: Socket,
     @MessageBody()
-    data: { roomId: string },
+    data: { roomId: string; userName?: string },
   ) {
     const user = await this.httpService.joinRoom({
       roomId: data.roomId,
       userSocketId: client.id,
+      userName: data.userName,
     });
 
     if (user) {
@@ -68,6 +69,16 @@ export class HttpGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (user) {
       const room = await this.httpService.getUpdatedRoom(user.roomId);
       client.emit('user:me', user);
+      this.server.to(room.id).emit('room:updated', room);
+    }
+  }
+
+  @SubscribeMessage('user:leave-room')
+  async onUserLeaveRoom(@ConnectedSocket() client: Socket) {
+    const room = await this.httpService.removeUserFromRoom(client.id);
+    console.log({ room });
+
+    if (room) {
       this.server.to(room.id).emit('room:updated', room);
     }
   }

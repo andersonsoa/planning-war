@@ -1,6 +1,5 @@
 import { FormEvent, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { socket } from "../../lib/socket";
 
 export function RoomCreate() {
   const navigate = useNavigate();
@@ -11,7 +10,6 @@ export function RoomCreate() {
     const form = new FormData(e.currentTarget);
 
     const data = JSON.stringify({
-      socketId: socket.id,
       title: form.get("room-name"),
     });
 

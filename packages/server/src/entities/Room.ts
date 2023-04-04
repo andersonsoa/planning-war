@@ -1,8 +1,8 @@
 export class Room {
   id: string;
-  ownerId: string;
   title: string;
   turns: number;
+  ownerId?: string;
   isReveled: boolean;
   users: string[];
   issue: string;
@@ -10,12 +10,12 @@ export class Room {
 
   constructor({
     id,
-    ownerId,
     title,
+    ownerId,
   }: {
     id: string;
-    ownerId: string;
     title: string;
+    ownerId?: string;
   }) {
     this.id = id;
     this.title = title;

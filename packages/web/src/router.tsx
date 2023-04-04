@@ -1,9 +1,10 @@
-import { Outlet, createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter } from "react-router-dom";
 import { ErrorPage } from "./components/ErrorPage";
 import { Home } from "./pages/Home";
 import { RoomWrapper } from "./pages/Room/RoomWrapper";
 import { RoomCreate } from "./pages/Room/RoomCreate";
 import { RoomDetail, loader as detailLoader } from "./pages/Room/RoomDetail";
+
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -16,7 +17,7 @@ export const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       {
-        path: "/room/create",
+        path: "/room",
         element: <RoomCreate />,
       },
       {

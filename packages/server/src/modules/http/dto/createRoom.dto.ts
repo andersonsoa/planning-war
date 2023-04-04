@@ -5,7 +5,8 @@ export class CreateRoomDTO {
   title: string;
 
   @IsNotEmpty({ message: 'Informe o dono da sala!' })
-  socketId: string;
+  @IsOptional()
+  socketId?: string;
 
   @IsOptional()
   userId?: string;

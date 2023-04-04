@@ -1,10 +1,11 @@
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { socket } from "../../lib/socket";
-import { LoaderFunctionArgs, useNavigate } from "react-router-dom";
+import { LoaderFunctionArgs, useNavigate, useParams } from "react-router-dom";
 import { Side } from "../../components/Side";
 import { Player } from "../../components/Player";
 import { ClipboardButton } from "../../components/ClipboardButton";
 import { Button } from "../../components/Button";
+import { useUserStore } from "../../store/userStore";
 
 type User = {
   id: string;
@@ -26,35 +27,40 @@ type Room = {
 };
 
 export function loader({ params }: LoaderFunctionArgs) {
+  const store = useUserStore.getState();
+
   socket.emit("user:join", {
+    userName: store.user?.name,
     roomId: params.roomId,
   });
+
   return params;
 }
 
 export function RoomDetail() {
   const fib = ["0", "1", "2", "3", "5", "8", "13", "21", "34", "55", "89", "?"];
 
-  const [me, setMe] = useState<User>();
-  const [room, setRoom] = useState<Room>();
+  const { roomId } = useParams();
 
+  const [room, setRoom] = useState<Room>();
+  const userStore = useUserStore();
   const navigate = useNavigate();
 
   function handleSelectCard(cardValue?: string) {
     socket.emit("user:update", {
-      id: me?.id,
-      selectedCard: cardValue === me?.selectedCard ? "" : cardValue,
+      id: userStore.user?.id,
+      selectedCard: cardValue === userStore.user?.selectedCard ? "" : cardValue,
     });
   }
 
   function handleReveal() {
-    if (!room?.isReveled && room?.ownerId === me?.id) {
+    if (!room?.isReveled && room?.ownerId === userStore.user?.id) {
       socket.emit("room:reveal", room?.id);
     }
   }
 
   function handleNewRound() {
-    if (room?.isReveled && room?.ownerId === me?.id) {
+    if (room?.isReveled && room?.ownerId === userStore.user?.id) {
       socket.emit("room:new-round", room?.id);
     }
   }
@@ -75,8 +81,11 @@ export function RoomDetail() {
     const onConnect = () => console.log("[socket] connected");
 
     socket.on("connect", onConnect);
+    socket.connect();
+
     return () => {
       socket.off("connect", onConnect);
+      socket.disconnect();
     };
   }, []);
 
@@ -86,7 +95,7 @@ export function RoomDetail() {
     };
 
     const onMe = (me: User) => {
-      setMe(() => ({ ...me }));
+      userStore.updateUser(me);
     };
 
     const onRoomUpdated = (room: any) => {
@@ -105,26 +114,24 @@ export function RoomDetail() {
   }, []);
 
   const owner = room?.users.find((user) => user.id === room?.ownerId);
-  const isOwner = me?.id === owner?.id;
+  const isOwner = userStore.user?.id === owner?.id;
   const commonUsers =
     room?.users.filter((user) => user.id !== room.ownerId) ?? [];
 
-  const average = useMemo(() => {
-    return room?.users
-      .filter((u) => !u.isSpectator)
-      .map((u) => ({ ...u, selectedCard: u.selectedCard || "😴" }))
-      .reduce((acc: Record<string, any>, cur) => {
-        return {
-          ...acc,
-          [cur.selectedCard]: acc[cur.selectedCard]
-            ? {
-                count: acc[cur.selectedCard].count + 1,
-                names: [...acc[cur.selectedCard].names, cur.name],
-              }
-            : { count: 1, names: [cur.name] },
-        };
-      }, {});
-  }, [room?.isReveled]);
+  const average = room?.users
+    .filter((u) => !u.isSpectator)
+    .map((u) => ({ ...u, selectedCard: u.selectedCard || "😴" }))
+    .reduce((acc: Record<string, any>, cur) => {
+      return {
+        ...acc,
+        [cur.selectedCard]: acc[cur.selectedCard]
+          ? {
+              count: acc[cur.selectedCard].count + 1,
+              names: [...acc[cur.selectedCard].names, cur.name],
+            }
+          : { count: 1, names: [cur.name] },
+      };
+    }, {});
 
   return (
     <>
@@ -146,13 +153,13 @@ export function RoomDetail() {
             ) : (
               commonUsers.map((cUser) => (
                 <Player
-                  key={cUser.id}
                   id={cUser.id}
-                  isYou={cUser.id === me?.id}
+                  key={cUser.id}
+                  isYou={cUser.id === userStore.user?.id}
                   name={cUser.name ?? "Unknow"}
                   selectedCard={cUser.selectedCard}
-                  isReveled={room?.isReveled}
                   isSpectator={cUser.isSpectator}
+                  isReveled={room?.isReveled}
                   side="top"
                 />
               ))
@@ -191,7 +198,7 @@ export function RoomDetail() {
           <Side>
             {owner ? (
               <Player
-                isYou={owner.id === me?.id}
+                isYou={owner.id === userStore.user?.id}
                 id={owner.id}
                 name={owner.name ?? "Unknow"}
                 side="bottom"
@@ -229,16 +236,16 @@ export function RoomDetail() {
         ) : (
           <div className="flex flex-col items-center gap-4">
             <p className="text-sm">
-              Escolha sua carta {me?.selectedCard ? "👍" : "👇"}
+              Escolha sua carta {userStore.user?.selectedCard ? "👍" : "👇"}
             </p>
             <div className="flex gap-2 items-center justify-center">
               {fib.map((value) => {
                 return (
                   <button
                     key={value}
-                    disabled={me?.isSpectator}
+                    disabled={userStore.user?.isSpectator}
                     className={`w-14 h-24 rounded grid place-items-center transition-all text-lg font-bold ${
-                      value === me?.selectedCard
+                      value === userStore.user?.selectedCard
                         ? "bg-purple-600 -translate-y-2"
                         : "hover:-translate-y-2 bg-zinc-800"
                     }`}

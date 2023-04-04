@@ -17,21 +17,13 @@ export class HttpService {
 
   async createRoom(roomData: CreateRoomDTO) {
     const roomId = uuid();
-    const userId = roomData.userId ?? uuid();
 
     const newRoom = new Room({
       id: roomId,
-      ownerId: userId,
+      ownerId: roomData.userId,
       title: roomData.title,
     });
 
-    const newUser = new User({
-      id: userId,
-      name: nameGenerator(),
-      socketId: roomData.socketId,
-    });
-
-    await this.userRepository.saveUser(newUser);
     await this.roomRepository.saveRoom(newRoom);
 
     return this.roomRepository.getRoomById(roomId);
@@ -53,25 +45,32 @@ export class HttpService {
     };
   }
 
-  async joinRoom(data: { roomId: string; userSocketId: string }) {
+  async joinRoom(data: {
+    roomId: string;
+    userSocketId: string;
+    userId?: string;
+    userName?: string;
+  }) {
     const room = await this.roomRepository.getRoomById(data.roomId);
     if (!room) return;
 
-    let user = await this.userRepository.getUserBySocket(data.userSocketId);
+    const user = new User({
+      id: data.userId || uuid(),
+      socketId: data.userSocketId,
+      name: nameGenerator(),
+    });
 
-    if (!user) {
-      user = new User({
-        id: uuid(),
-        socketId: data.userSocketId,
-        name: nameGenerator(),
-      });
+    if (data.userName) {
+      user.name = data.userName;
     }
 
-    user.roomId = data.roomId;
+    user.roomId = room.id;
+    room.users.push(user.id);
+    if (!room.ownerId) {
+      room.ownerId = user.id;
+    }
 
     await this.userRepository.saveUser(user);
-
-    room.users.push(user.id);
     await this.roomRepository.saveRoom(room);
 
     return user;
@@ -129,6 +128,7 @@ export class HttpService {
     await this.roomRepository.saveRoom(room);
     return true;
   }
+
   async removeUserFromRoom(userSocketId: string) {
     const user = await this.userRepository.getUserBySocket(userSocketId);
     if (!user) return null;
