@@ -40,8 +40,6 @@ export function loader({ params }: LoaderFunctionArgs) {
 export function RoomDetail() {
   const fib = ["0", "1", "2", "3", "5", "8", "13", "21", "34", "55", "89", "?"];
 
-  const { roomId } = useParams();
-
   const [room, setRoom] = useState<Room>();
   const userStore = useUserStore();
   const navigate = useNavigate();
@@ -98,7 +96,7 @@ export function RoomDetail() {
       userStore.updateUser(me);
     };
 
-    const onRoomUpdated = (room: any) => {
+    const onRoomUpdated = (room: Room) => {
       setRoom(() => room);
     };
 
@@ -121,7 +119,7 @@ export function RoomDetail() {
   const average = room?.users
     .filter((u) => !u.isSpectator)
     .map((u) => ({ ...u, selectedCard: u.selectedCard || "😴" }))
-    .reduce((acc: Record<string, any>, cur) => {
+    .reduce((acc: Record<string, { count: number; names: string[] }>, cur) => {
       return {
         ...acc,
         [cur.selectedCard]: acc[cur.selectedCard]

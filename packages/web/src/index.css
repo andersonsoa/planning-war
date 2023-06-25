@@ -39,3 +39,7 @@ body {
   @apply bg-purple-600 text-white;
   transform: rotateY(180deg);
 }
+
+.section {
+  @apply p-4 h-screen flex flex-col items-center justify-center gap-8 max-w-4xl mx-auto w-[600px];
+}
