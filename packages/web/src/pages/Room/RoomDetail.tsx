@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useState } from "react";
 import { socket } from "../../lib/socket";
-import { LoaderFunctionArgs, useNavigate, useParams } from "react-router-dom";
+import { LoaderFunctionArgs, useNavigate } from "react-router-dom";
 import { Side } from "../../components/Side";
 import { Player } from "../../components/Player";
 import { ClipboardButton } from "../../components/ClipboardButton";
