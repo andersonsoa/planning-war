@@ -25,6 +25,7 @@ export function RoomWrapper() {
         <h1 className="text-2xl font-extrabold">
           <Link to="/">Planning Wars</Link>
         </h1>
+
         {userStore.user ? (
           <UpdatePlayerName
             onSubmit={handleChangeName}
